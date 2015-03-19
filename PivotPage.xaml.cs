@@ -125,6 +125,10 @@ namespace CySmart
 
         #endregion
 
+        /// <summary>
+        /// Scans for BLE devices and loads list
+        /// </summary>
+        /// <returns></returns>
         private async Task ScanDevices()
         {
             lstDevices.Items.Clear();
@@ -142,12 +146,20 @@ namespace CySmart
             }
         }
 
+        /// <summary>
+        /// Loads GATT services when device list item is tapped
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void lstDevices_Tapped(object sender, TappedRoutedEventArgs e)
         {
             currentDevice = (lstDevices.SelectedItem as MyBluetoothLEDevice).BluetoothLEDevice;
             LoadGattServices();
         }
 
+        /// <summary>
+        /// Loads GATT services information in list and attaches to CapSense and RGB led custom services if available.
+        /// </summary>
         private void LoadGattServices()
         {
             if (currentCapSenseCharacteristic != null)
@@ -166,13 +178,18 @@ namespace CySmart
                 foreach (var characteristic in service.GetAllCharacteristics())
                 {
                     if (characteristic.Uuid == Guid.Parse("0000caa2-0000-1000-8000-00805f9b34fb"))
-                        AttachToCapSnese(characteristic);
+                        AttachToCapSense(characteristic);
                     else if (characteristic.Uuid == Guid.Parse("0000cbb1-0000-1000-8000-00805f9b34fb"))
                         AttachToRGBLed(characteristic);
                 }
             }
         }
 
+        /// <summary>
+        /// Loads characteristics when GATT service is selected
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void lstGattServices_Tapped(object sender, TappedRoutedEventArgs e)
         {
             await Task.Delay(1);
@@ -186,18 +203,32 @@ namespace CySmart
             }
         }
 
+        /// <summary>
+        /// Handle Characteristics_Tapped here
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void lstCharacteristics_Tapped(object sender, TappedRoutedEventArgs e)
         {
             await Task.Delay(1);
         }
 
+        /// <summary>
+        /// Reloads devices
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void ButtonRefresh_Click(object sender, RoutedEventArgs e)
         {
             this.currentDevice = null;
             await ScanDevices();
         }
 
-        private async void AttachToCapSnese(GattCharacteristic characteristic)
+        /// <summary>
+        /// Attaches valuechanged to capsense characteristic
+        /// </summary>
+        /// <param name="characteristic"></param>
+        private async void AttachToCapSense(GattCharacteristic characteristic)
         {
             currentCapSenseCharacteristic = characteristic;
             currentCapSenseCharacteristic.ValueChanged += currentCapSenseCharacteristic_ValueChanged;
@@ -209,6 +240,11 @@ namespace CySmart
             }
         }
 
+        /// <summary>
+        /// Handles value changed of capsense slider
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         private async void currentCapSenseCharacteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
         {
             var data = new byte[args.CharacteristicValue.Length];
@@ -221,22 +257,44 @@ namespace CySmart
             });
         }
 
+        /// <summary>
+        /// Remembers current RGB led characteristic
+        /// </summary>
+        /// <param name="characteristic"></param>
         private void AttachToRGBLed(GattCharacteristic characteristic)
         {
             currentRGBLedCharacteristic = characteristic;
         }
 
+        /// <summary>
+        /// Sends RGB data when Brightness changes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void SliderBrightness_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
             if (ColorPicker != null)
                 await SendRGBLedData(e.NewValue, ColorPicker.RedValue, ColorPicker.GreenValue, ColorPicker.BlueValue);
         }
 
+        /// <summary>
+        /// Sends RGB data when color is selected
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void ColorPicker_Tapped(object sender, TappedRoutedEventArgs e)
         {
             await SendRGBLedData(BrightnessSlider.Value, ColorPicker.RedValue, ColorPicker.GreenValue, ColorPicker.BlueValue);
         }
 
+        /// <summary>
+        /// Sends RGB led data
+        /// </summary>
+        /// <param name="brightness"></param>
+        /// <param name="red"></param>
+        /// <param name="green"></param>
+        /// <param name="blue"></param>
+        /// <returns></returns>
         private async Task SendRGBLedData(double brightness, int red, int green, int blue)
         {
             if (currentRGBLedCharacteristic != null)
