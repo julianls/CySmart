@@ -16,7 +16,6 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
-using Microsoft.ApplicationInsights;
 
 // The Pivot Application template is documented at http://go.microsoft.com/fwlink/?LinkID=391641
 
@@ -27,11 +26,6 @@ namespace CySmart
     /// </summary>
     public sealed partial class App : Application
     {
-        /// <summary>
-        /// Allows tracking page views, exceptions and other telemetry through the Microsoft Application Insights service.
-        /// </summary>
-        public static TelemetryClient TelemetryClient;
-
         private TransitionCollection transitions;
 
         /// <summary>
@@ -40,8 +34,6 @@ namespace CySmart
         /// </summary>
         public App()
         {
-            TelemetryClient = new TelemetryClient();
-
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
         }
